@@ -1,0 +1,76 @@
+#!/bin/bash
+
+VERSION=v0.1.2
+
+set -e
+
+help() {
+  echo "Usage:"
+  echo "  zmicro package install gokey <args...>"
+  echo ""
+}
+
+install() {
+  # get system os/arch/bin_path
+  local arch="$(os::arch)"
+  local os="linux"
+  local bin_path=/usr/bin
+
+  if [ "$(os::is_macos)" = "true" ]; then
+    os="darwin"
+    bin_path=/usr/local/bin
+  fi
+
+  # prepare vars
+  local name="gokey"
+  local tmp_dir="/tmp/$name"
+  local tmp_file="$tmp_dir/$name"
+  local tar_gz_bin="./$name"
+  local user_bin="$bin_path/$name"
+
+  # prepare context
+  mkdir -p $tmp_dir
+  cd $tmp_dir
+
+  # reference: https://github.com/cloudflare/gokey/releases
+  # example:
+  #   https://github.com/cloudflare/gokey/releases/download/v0.1.2/gokey-v0.1.2-darwin-arm64
+  #   https://github.com/cloudflare/gokey/releases/download/v0.1.2/gokey-v0.1.2-darwin-amd64
+  # generate url
+  local url="https://github.com/cloudflare/gokey/releases/download/$VERSION/${name}-${VERSION}-${os}-${arch}"
+  log::debug "[package][$name] url: $url"
+
+  # download
+  os::curl --progress-bar -fSL $url -o $tmp_file
+
+  # extract
+  # tar -zxvf $tmp_file >>/dev/null 2>&1
+
+  # install
+  sudo mv $tar_gz_bin $user_bin
+
+  # clean
+  rm -rf $tmp_dir
+}
+
+core() {
+  if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    help
+    exit 0
+  fi
+
+  install
+  if [ $? -eq 0 ]; then
+    log::success "install gokey success."
+    exit 0
+  else
+    log::error "install gokey failed."
+    exit 1
+  fi
+}
+
+run() {
+  core $@
+}
+
+run $@
