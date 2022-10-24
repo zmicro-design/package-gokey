@@ -9,7 +9,8 @@ help() {
 }
 
 version() {
-  gokey version
+  # gokey version
+  echo "v0.1.2"
 }
 
 core() {
