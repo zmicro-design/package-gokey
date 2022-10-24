@@ -46,6 +46,9 @@ install() {
   # extract
   # tar -zxvf $tmp_file >>/dev/null 2>&1
 
+  # make executable
+  chmod +x $tar_gz_bin
+
   # install
   sudo mv $tar_gz_bin $user_bin
 
